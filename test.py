@@ -55,9 +55,7 @@ def plot_bmi_vs_age():
         buf = io.BytesIO()
         plt.savefig(buf, format='png', dpi=120, bbox_inches='tight')
         buf.seek(0)
-        
-        
-        plt.show()
+
         
         return buf
 

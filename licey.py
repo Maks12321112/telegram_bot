@@ -1,14 +1,4 @@
-import logging
-from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import (
-    ApplicationBuilder,
-    CommandHandler,
-    MessageHandler,
-    filters,
-    ContextTypes,
-    ConversationHandler,
-    CallbackContext
-)
+
 from datetime import datetime
 import asyncio
 import sqlalchemy as sa
@@ -20,7 +10,8 @@ from forms.tasks import Task
 from sessions import *
 import requests
 from health import *
-
+from weather import *
+from test import *
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -39,7 +30,9 @@ FLEXIBILITY_TEST, PUSHUPS_TEST, COOPER_TEST, MILE_TEST, WAITING_CITY
 def keyboard():
     return ReplyKeyboardMarkup([
         ['/planning_tasks', '/health'],
-        ['/profile', '/help']
+        ['/profile', '/help',
+         '/weather'],
+         ['/bmi_stats']
     ], resize_keyboard=True)
 
 
@@ -331,7 +324,17 @@ async def handle_flexibility(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return FLEXIBILITY_TEST
 
 
+async def bmi_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+   
+    buf = plot_bmi()
+    
+    buf.seek(0)  
+    await update.message.reply_photo(
+        photo=buf,
+        caption="График зависимости BMI от возраста пользователей"
+    )
 
+    buf.close()
 
 
 
@@ -353,7 +356,8 @@ def main():
             MAIN_MENU: [
                 CommandHandler('planning_tasks', planning_tasks),
                 CommandHandler('health', health_menu),
-                
+                CommandHandler('weather', weather_command),
+                CommandHandler('bmi_stats', bmi_stats),
                 CommandHandler('cancel', cancel)
             ],
             AUTH_CHOICE: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_auth_choice)],
@@ -365,6 +369,7 @@ def main():
             LOGIN_EMAIL: [MessageHandler(filters.TEXT & ~filters.COMMAND, login_email)],
             LOGIN_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, login_password)],
             TASK_TIME: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_task)],
+            WAITING_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_city)],
             HEALTH_MENU: [
                 CommandHandler('bmi', bmi_start),
                 CommandHandler('flexibility', flexibility_test),
@@ -381,6 +386,7 @@ def main():
             PUSHUPS_TEST: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_pushups)],
             COOPER_TEST: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_cooper)],
             MILE_TEST: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_mile)],
+            
 
            
         },

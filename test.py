@@ -9,13 +9,10 @@ from forms.user import User
 from forms.healthtest import HealthTest
 global_init('bot_database.db')
 
-
-
 def plot_bmi_vs_age():
     session = create_session()
     
     try:
-
         users = session.query(
             HealthTest.user_id,
             HealthTest.result,
@@ -27,12 +24,10 @@ def plot_bmi_vs_age():
         ).distinct().order_by(
             User.age
         ).all()
-        print()
-        print(users[0].age, 11111111111111111111111111)
+
         if not users:
             print("Нет пользователей с указанным возрастом и тестами BMI")
             return None
-
 
         ages = []
         bmis = []
@@ -57,19 +52,21 @@ def plot_bmi_vs_age():
         plt.ylabel("Значение BMI")
         plt.legend()
         plt.grid(True, alpha=0.3)
-        plt.show()
-
         buf = io.BytesIO()
         plt.savefig(buf, format='png', dpi=120, bbox_inches='tight')
         buf.seek(0)
-        plt.close()
-        print(0)
+        
+        
+        plt.show()
+        
         return buf
 
     except Exception as e:
-        print(f"Ошибка при построении графика: {str(e)}")
+        print(f"Ошибка: {str(e)}")
         return None
     finally:
         session.close()
+
 if __name__ == "__main__":
-    plot_bmi_vs_age()  
+    buf = plot_bmi_vs_age()
+plot_bmi_vs_age()

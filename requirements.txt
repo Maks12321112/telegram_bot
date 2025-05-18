@@ -1,0 +1,5 @@
+g4f
+matplotlib
+python-telegram-bot
+Requests
+SQLAlchemy
